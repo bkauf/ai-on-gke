@@ -24,7 +24,8 @@ examples below to understand how this tool work better.
 1.  Compute Engine API must be enabled.
     (https://console.developers.google.com/apis/api/compute.googleapis.com/overview?project=$PROJECT_NAME)
 1.  Verify that `$PROJECT_NUMBER-compute@developer.gserviceaccount.com` has
-    `storage.objectCreator` permissions to the provided *GCS path* for the logs.
+    `storage.objectCreator` and `storage.objectViewer` permissions to the
+    provided *GCS path* for the logs and startup script.
     You can run the following command to grant proper permissions for this:
 
     ```shell
@@ -32,6 +33,11 @@ examples below to understand how this tool work better.
       --project=$PROJECT_NAME \
       --member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com \
       --role=roles/storage.objectCreator
+
+      gcloud storage buckets add-iam-policy-binding gs://$GCS_PATH \
+      --project=$PROJECT_NAME \
+      --member=serviceAccount:$PROJECT_NUMBER-compute@developer.gserviceaccount.com \
+      --role=roles/storage.objectViewer
     ```
 
 1.  If a disk image with the given name (via the **--image-name** flag) already
@@ -48,7 +54,7 @@ Flag                | Required | Default | Description
 *--job-name*        | No       | secondary-disk-image | Name of the workflow. This name is used to provision some of the intermediate resources (disks, VMs) needed by the workflow. The maximum length is 50 characters
 *--zone*            | Yes      | nil     | Zone where the resources will be used to create the image creator resources
 *--gcs-path*        | Yes      | nil     | GCS path prefix to dump the logs
-*--container-image* | Yes      | nil     | Container image to include in the disk image. This flag can be specified multiple times
+*--container-image* | Yes      | nil     | Container image with tag to include in the disk image. Tag are required for image like `latest` in this example: `docker.io/library/python:latest`. This flag can be specified multiple times
 *--gcp-oauth*       | No       | nil     | Path to GCP service account credential file
 *--disk-size-gb*    | No       | 10      | Size of a disk that will host the unpacked images
 *--image-pull-auth* | No       | 'None'  | Auth mechanism to pull the container image, valid values: [None, ServiceAccountToken]. None means that the images are publically available and no authentication is required to pull them. ServiceAccountToken means the service account oauth token will be used to pull the images. For more information refer to https://cloud.google.com/compute/docs/access/authenticate-workloads#applications
